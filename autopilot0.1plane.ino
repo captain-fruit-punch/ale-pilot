@@ -1,33 +1,35 @@
 #include <Servo.h>
 
 float mpd = 111319.9 // meters per degree
-float adrpd
 
-float rgx = 0 // raw gps x position
-float rgy = 0 // raw gps x position
+float rgx = 0; // raw gps x position
+float rgy = 0; // raw gps x position
 
-float ugx = 0 // updated gps x position
-float ugy = 0 // updated gps y position
+float ugx = 0; // updated gps x position
+float ugy = 0; // updated gps y position
 
-float igx = 0 // intended gps x position
-float igy = 0 // intended gps y position
+float lgx = 0; // last gps x position
+float lgy = 0; // last gps y position
+
+float igx = 0; // intended gps x position
+float igy = 0; // intended gps y position
 
 Servo res; // servo right elevator
-int srep = // servo right elevator pin
-float recp = 0 // right elevator current position
-float reg = 0 // right elevator gain
-float reip = 0 // right elevator intended position
+int srep = 0;// servo right elevator pin
+float recp = 0; // right elevator current position
+float reg = 0; // right elevator gain
+float reip = 0; // right elevator intended position
 
 Servo le; // servo left elevator
-int slep = // servo left elevator pin
-float lecp = 0 // left elevator current position
-float leg = 0 // left elevator gain
-float leip = 0 // left elevator intended position
+int slep = 0; // servo left elevator pin
+float lecp = 0; // left elevator current position
+float leg = 0; // left elevator gain
+float leip = 0; // left elevator intended position
 
-float ih = 0 // intended heading, taken from degree counts from north towards east
-float ie = 0 // intended elevation, done in meters
+float ih = 0; // intended heading, taken from degree counts from north towards east
+float ie = 0; // intended elevation, done in meters
 
-float ce = 0 // current elevation, done in meters
+float ce = 0; // current elevation, done in meters
 
 
 void setup() {
@@ -40,7 +42,9 @@ void loop() {
 }
 
 void correctgps() {
-
+	if (rgx > cgx < rgx || rgy > cgy < rgx) {
+		
+	}
 }
 
 void distanceto() {
