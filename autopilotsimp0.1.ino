@@ -1,49 +1,68 @@
-#include <Servo.h>
-
-float mpd = 111319.9 // meters per degree
-float adrpd
+#include "Servo.h"
+#include "TinyGPS++.h"
 
 // servos and turning
 Servo res; // servo right elevator
 int srep = // servo right elevator pin
-float recp = 0 // right elevator current position
+double recp = 0 // right elevator current position
 
 Servo les; // servo left elevator
 int slep = // servo left elevator pin
-float lecp = 0 // left elevator current position
+double lecp = 0 // left elevator current position
 
 // sensor and status
-float ch = 0 // current heading, taken from degree counts from north towards east
-float te = 0 // target elevation, done in meters
-float ce = 0 // current elevation, done in meters
+double ch = 0 // current heading, taken from degree counts from north towards east
+double te = 0 // target elevation, done in meters
+double ce = 0 // current elevation, done in meters
+double cs = 0 // current speed done in meters per second
 
 // gps
-float rgx = 0 // raw gps x position
-float rgy = 0 // raw gps x position
+TinyGPSPlus gps; // gps parser object
+double rgx = 0 // raw gps x position
+double rgy = 0 // raw gps x position
 
-float ugx = 0 // updated gps x position
-float ugy = 0 // updated gps y position
+double ugx = 0 // updated gps x position
+double ugy = 0 // updated gps y position
 
-float tgx = 0 // target gps x position
-float tgy = 0 // target gps y position
+double lgx = 0 // last gps x position
+double lgy = 0 // last gps y position
+
+double tgx = 0 // target gps x position
+double tgy = 0 // target gps y position
 
 // constants
-const float mtd = 100 // mild turn degree
-const float mspd = 10 // miliseconds per degree
-const float td = 10 // turn time (degree)
-const float rd = 90 // rest degree
+const double mtd = 100 // mild turn degree
+const double mspd = 10 // miliseconds per degree
+const double td = 10 // turn time (degree)
+const double rd = 90 // rest degree
+double mpd = 111319.9 // meters per degree
+double adrpd
 
 void setup() {
 	res.attach(srep);
 	les.attach(slep);
+	Serial.begin(9600);
 }
 
 void loop() {
-
+	if (Serial.available()) {
+		gps.encode(Serial.read());
+		lgx = ugx; // set last gps location
+		lgy = ugy;
+		rgx = gps.location.lng();
+		rgy = gps.location.lat();
+		cs = gps.speed.mps();
+		correctgps();
+	}
 }
 
 void correctgps() {
-	if (rgx )
+	double rrmgx = rgx * mpd; // current relative raw x position in meters
+	double rrmgy = rgy * mpd; // current relative raw y position in meters
+	double rlmgx = lgx * mpd; // last relative x position in meters
+	double rlmgy = lgy * mpd; // last relative y position in meters
+	double rdmgx = abs(rrmgx - rlmgx);
+	double rdmgy = abs(rrmgy - rlmgx);
 }
 
 void distancetot() { // distance to target
@@ -51,7 +70,7 @@ void distancetot() { // distance to target
 }
 
 void mildturn(direction, th) { // true is right, false as left; target heading
-	float dh = ch - th;
+	double dh = ch - th;
 	if (direction) { // begin turn with swiveling
 		res.write(mtd);
 		les.write(90-(mtd-90));
