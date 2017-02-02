@@ -3,11 +3,11 @@
 
 // servos and turning
 Servo res; // servo right elevator
-int srep = // servo right elevator pin
-double recp = 0 // right elevator current position
+int srep = 10; // servo right elevator pin
+double recp = 0; // right elevator current position
 
 Servo les; // servo left elevator
-int slep = // servo left elevator pin
+int slep = 9; // servo left elevator pin
 double lecp = 0;// left elevator current position
 
 // sensor and status
@@ -31,13 +31,14 @@ double tgx = 0; // target gps x position
 double tgy = 0; // target gps y position
 
 // constants
-const double mtd = 100; // mild turn degree
-const double mspd = 10; // miliseconds per degree
-const double td = 10; // turn time (degree)
-const double rd = 90; // rest degree
-const double mpd = 111319.9; // meters per degree
-const double gem = 1; // gps error margin in meters
-const double dtr = 0.0174533; // degrees to radians
+double mtd = 100; // mild turn degree
+double mspd = 10; // miliseconds per degree
+double td = 10; // turn time (degree)
+double rd = 90; // rest degree
+double mpd = 111319.9; // meters per degree
+double gem = 1; // gps error margin in meters
+double dtr = 0.0174533; // degrees to radians
+double tsd = 10; // target stop distance (when the autopilot disengages)
 
 void setup() {
 	res.attach(srep);
@@ -48,16 +49,26 @@ void setup() {
 void loop() {
 	if (Serial.available()) {
 		gps.encode(Serial.read());
-		lgx = ugx; // set last gps location
-		lgy = ugy;
-		rgx = gps.location.lng();
-		rgy = gps.location.lat();
-		cs = gps.speed.mps();
 		correctgps();
+	}
+	if (distancetot() > tsd) {
+		double htt = atan2(abs(tgx - ugx), abs(tgy - ugy)) / dtr; // heading towards target
+		double dh = ch - htt;
+		if (dh > 0) {
+			mildturn(true, dh);
+		}
+		else {
+			mildturn(false, abs(dh));
+		}
 	}
 }
 
 void correctgps() {
+	lgx = ugx; // set last gps location
+	lgy = ugy;
+	rgx = gps.location.lng();
+	rgy = gps.location.lat();
+	cs = gps.speed.mps();
 	double rrmgx = rgx * mpd; // current relative raw x position in meters
 	double rrmgy = rgy * mpd; // current relative raw y position in meters
 	double rlmgx = lgx * mpd; // last relative x position in meters
@@ -84,27 +95,27 @@ void correctgps() {
 	}
 }
 
-void distancetot() { // distance to target
-
+double distancetot() { // distance to target
+	return sqrt(sq(abs(ugx - tgx)) + sq(abs(ugy - tgy)));
 }
 
-void mildturn(direction, th) { // true is right, false as left; target heading
+void mildturn(bool direction, float th) { // true is right, false as left; target heading
 	double dh = ch - th;
 	if (direction) { // begin turn with swiveling
 		res.write(mtd);
 		les.write(90-(mtd-90));
 	}
 	if (!direction) {
-		res.write(90-(mtd-90);
-		les.write(mtd));
+		res.write(90-(mtd-90));
+		les.write(mtd);
 	}
 	delay(mspd * td); // wait for swivel
 	res.write(mtd); // begin turn
 	res.write(mtd);
 	delay(dh * (th-ch)); // wait for turn
 	if (direction) { // unswivel
-		res.write(90-(mtd-90);
-		les.write(mtd));
+		res.write(90-(mtd-90));
+		les.write(mtd);
 	}
 	if (!direction) {
 		res.write(mtd);
@@ -113,32 +124,4 @@ void mildturn(direction, th) { // true is right, false as left; target heading
 	delay(mspd * td); // wait for unswivel
 	res.write(rd); // return to neutral
 	les.write(rd);
-}
-
-// right
-void updatere() {
-	if (recp > reip) {
-		recp = recp - (reg / reip);
-	}
-	else if (recp < reip) {
-		recp = recp + (reg / reip);
-	}
-}
-
-void powerres() {
-	res.write(recp);
-}
-
-// left
-void updatele() {
-	if (lecp > leip) {
-		lecp = lecp - (leg / leip);
-	}
-	else if (lecp < leip) {
-		lecp = lecp + (leg / leip);
-	}
-}
-
-void powerles() {
-	les.write(lecp);
 }
