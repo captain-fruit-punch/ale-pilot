@@ -8,35 +8,36 @@ double recp = 0 // right elevator current position
 
 Servo les; // servo left elevator
 int slep = // servo left elevator pin
-double lecp = 0 // left elevator current position
+double lecp = 0;// left elevator current position
 
 // sensor and status
-double ch = 0 // current heading, taken from degree counts from north towards east
-double te = 0 // target elevation, done in meters
-double ce = 0 // current elevation, done in meters
-double cs = 0 // current speed done in meters per second
+double ch = 0; // current heading, taken from degree counts from north towards east
+double te = 0; // target elevation, done in meters
+double ce = 0; // current elevation, done in meters
+double cs = 0; // current speed done in meters per second
 
 // gps
 TinyGPSPlus gps; // gps parser object
-double rgx = 0 // raw gps x position
-double rgy = 0 // raw gps x position
+double rgx = 0; // raw gps x position
+double rgy = 0; // raw gps x position
 
-double ugx = 0 // updated gps x position
-double ugy = 0 // updated gps y position
+double ugx = 0; // updated gps x position
+double ugy = 0; // updated gps y position
 
-double lgx = 0 // last gps x position
-double lgy = 0 // last gps y position
+double lgx = 0; // last gps x position
+double lgy = 0; // last gps y position
 
-double tgx = 0 // target gps x position
-double tgy = 0 // target gps y position
+double tgx = 0; // target gps x position
+double tgy = 0; // target gps y position
 
 // constants
-const double mtd = 100 // mild turn degree
-const double mspd = 10 // miliseconds per degree
-const double td = 10 // turn time (degree)
-const double rd = 90 // rest degree
-double mpd = 111319.9 // meters per degree
-double adrpd
+const double mtd = 100; // mild turn degree
+const double mspd = 10; // miliseconds per degree
+const double td = 10; // turn time (degree)
+const double rd = 90; // rest degree
+const double mpd = 111319.9; // meters per degree
+const double gem = 1; // gps error margin in meters
+const double dtr = 0.0174533; // degrees to radians
 
 void setup() {
 	res.attach(srep);
@@ -61,8 +62,26 @@ void correctgps() {
 	double rrmgy = rgy * mpd; // current relative raw y position in meters
 	double rlmgx = lgx * mpd; // last relative x position in meters
 	double rlmgy = lgy * mpd; // last relative y position in meters
-	double rdmgx = abs(rrmgx - rlmgx);
-	double rdmgy = abs(rrmgy - rlmgx);
+	double dmgx = abs(rrmgx - rlmgx); // delta relative change x in meters
+	double dmgy = abs(rrmgy - rlmgx); // delta relative change y in meters
+	if (dmgx > cs + gem) { // if the delta change exceeds probable speed, assume
+		if (ch < 90){ // if it's below 90˚, edit north and east (both positive)
+			ugx += (sin(ch * dtr) * cs) / mpd;
+			ugy += (cos(ch * dtr) * cs) / mpd;
+		}
+		else if (ch < 180) { // if it's above 90˚ but below 180˚ subtract from north and add to east
+			ugx += (cos((ch - 90) * dtr) * cs) / mpd;
+			ugy -= (sin((ch - 90) * dtr) * cs) / mpd;
+		}
+		else if (ch < 270) { // if it's above 180˚ but below 270˚ subtract from north and east
+			ugy -= (sin((ch - 180) * dtr) * cs) / mpd;
+			ugx -= (cos((ch - 180) * dtr) * cs) / mpd;
+		}
+		else { // if it's above 270˚ the add to north and subtract from east
+			ugy += (sin((ch - 270) * dtr) * cs) / mpd;
+			ugx -= (cos((ch - 270) * dtr) * cs) / mpd;
+		}
+	}
 }
 
 void distancetot() { // distance to target
