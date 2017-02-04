@@ -125,3 +125,17 @@ void mildturn(bool direction, float th) { // true is right, false as left; targe
 	res.write(rd); // return to neutral
 	les.write(rd);
 }
+
+void checkforcommands() {
+	String sm = Serial.readString();
+	if (sm = "mtd") {
+		Serial.println("enter in a new value for mild turn degree");
+		while(!Serial.available());
+		mtd = Serial.parseFloat();
+	}
+	if (sm = "td") {
+		Serial.println("enter in a new value for turn time per degree");
+		while(!Serial.available());
+		td = Serial.parseFloat();
+	}
+}
