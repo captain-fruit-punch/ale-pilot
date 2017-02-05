@@ -139,3 +139,6 @@ void checkforcommands() {
 		td = Serial.parseFloat();
 	}
 }
+
+void sensorupdate() {
+}
