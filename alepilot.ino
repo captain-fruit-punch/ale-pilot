@@ -30,6 +30,8 @@ double lgy = 0; // last gps y position
 double tgx = 0; // target gps x position
 double tgy = 0; // target gps y position
 
+double te = 0; // target elevation
+
 // constants
 double mtd = 100; // mild turn degree
 double mspd = 10; // miliseconds per degree
@@ -39,6 +41,7 @@ double mpd = 111319.9; // meters per degree
 double gem = 1; // gps error margin in meters
 double dtr = 0.0174533; // degrees to radians
 double tsd = 10; // target stop distance (when the autopilot disengages)
+double eem = 10; // elevation error margin
 
 void setup() {
 	res.attach(srep);
@@ -137,6 +140,15 @@ void checkforcommands() {
 		Serial.println("enter in a new value for turn time per degree");
 		while(!Serial.available());
 		td = Serial.parseFloat();
+	}
+}
+
+void elevationcorrect() {
+	if (ce > te + eem) { // you're too high, head down
+
+	}
+	else if (ce < te - eem) { // you're too low. head up
+		
 	}
 }
 
