@@ -10,7 +10,7 @@ Servo les; // servo left elevator
 int slep = 9; // servo left elevator pin
 double lecp = 0;// left elevator current position
 
-int rest = 90;
+int restpos = 90;
 
 void setup() {
   res.attach(srep);
@@ -20,7 +20,7 @@ void setup() {
 }
 
 void loop() {
-  testsurfaces(100);
+  testsurfaces(500);
 }
 
 void testsurfaces(int delaytime) {
@@ -31,13 +31,13 @@ void testsurfaces(int delaytime) {
   delay(delaytime);
   res.write(max);
   delay(delaytime);
-  res.write(rest);
+  res.write(restpos);
   // test left
   les.write(min);
   delay(delaytime);
   les.write(max);
   delay(delaytime);
-  les.write(rest);
+  les.write(restpos);
   // test both
   res.write(min);
   les.write(min);
@@ -45,8 +45,8 @@ void testsurfaces(int delaytime) {
   res.write(max);
   les.write(max);
   delay(delaytime);
-  res.write(rest);
-  les.write(rest);
+  res.write(restpos);
+  les.write(restpos);
   // test inverse both
   res.write(min);
   les.write(max);
@@ -54,10 +54,24 @@ void testsurfaces(int delaytime) {
   res.write(max);
   les.write(min);
   delay(delaytime);
-  res.write(rest);
-  les.write(rest);
+  res.write(restpos);
+  les.write(restpos);
 }
 
-void quickglide(int altitude) {
-  
+void quickrise(int incline, float risetime) { // incline from rest, time in seconds
+  int intensity = incline + restpos;
+  int settime = 500; // the time of the incline elevator in ms
+  res.write(intensity);
+  les.write(intensity);
+  delay(settime);
+  res.write(restpos);
+  les.write(restpos);
+  delay(risetime * 1000);
+  res.write(intensity - (2 * incline));
+  les.write(intensity - (2 * incline));
+  delay(settime);
+  res.write(restpos);
+  les.write(restpos);
 }
+
+void quickglide()
